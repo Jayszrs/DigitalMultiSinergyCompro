@@ -3,7 +3,7 @@ set -euo pipefail
 if [ ! -f .env ]; then cp .env.example .env; echo "Created .env from .env.example — edit passwords before production."; fi
 set -a; source .env; set +a
 
-docker compose up -d db wordpress
+docker compose up -d db wordpress phpmyadmin
 
 echo "Waiting for WordPress files..."
 for i in {1..30}; do
@@ -21,3 +21,4 @@ docker compose run --rm wpcli eval-file /workspace/scripts/seed.php
 echo "Optional plugins (Polylang + Wordfence + FluentSMTP) are not auto-activated."
 echo "Website: $WP_URL"
 echo "Admin:   $WP_URL/wp-admin"
+echo "Database: http://localhost:${PMA_PORT:-8081}"

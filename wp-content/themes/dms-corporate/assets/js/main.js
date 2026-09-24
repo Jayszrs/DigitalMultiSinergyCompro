@@ -3,7 +3,7 @@
   const navToggle = document.querySelector('[data-nav-toggle]');
   const nav = document.querySelector('[data-nav]');
 
-  const updateHeader = () => header?.classList.toggle('is-scrolled', window.scrollY > 60);
+  const updateHeader = () => header?.classList.toggle('is-scrolled', window.scrollY > 24);
   updateHeader();
   window.addEventListener('scroll', updateHeader, { passive: true });
 
@@ -13,19 +13,33 @@
     document.body.classList.toggle('nav-open', Boolean(open));
   });
 
+  nav?.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => {
+    nav.classList.remove('is-open');
+    navToggle?.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('nav-open');
+  }));
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || !nav?.classList.contains('is-open')) return;
+    nav.classList.remove('is-open');
+    navToggle?.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('nav-open');
+    navToggle?.focus();
+  });
+
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || typeof gsap === 'undefined') return;
   gsap.registerPlugin(ScrollTrigger);
 
   document.querySelectorAll('[data-reveal]').forEach((el) => {
-    gsap.fromTo(el, { opacity: 0, y: 36 }, {
-      opacity: 1, y: 0, duration: 0.8, ease: 'power3.out',
+    gsap.from(el, {
+      opacity: 0, y: 32, duration: 0.75, ease: 'power3.out',
       scrollTrigger: { trigger: el, start: 'top 84%', once: true }
     });
   });
 
   document.querySelectorAll('[data-stagger]').forEach((group) => {
-    gsap.fromTo(group.children, { opacity: 0, y: 30 }, {
-      opacity: 1, y: 0, duration: 0.7, stagger: 0.09, ease: 'power3.out',
+    gsap.from(group.children, {
+      opacity: 0, y: 28, duration: 0.65, stagger: 0.08, ease: 'power3.out',
       scrollTrigger: { trigger: group, start: 'top 82%', once: true }
     });
   });

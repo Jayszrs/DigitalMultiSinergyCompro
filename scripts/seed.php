@@ -15,6 +15,7 @@ $contact_id = dms_get_or_create_page('Contact Us', 'contact-us');
 update_option('show_on_front', 'page');
 update_option('page_on_front', $home_id);
 update_option('page_for_posts', $news_id);
+update_option('permalink_structure', '/%postname%/');
 
 $menu_name = 'Primary';
 $menu = wp_get_nav_menu_object($menu_name);

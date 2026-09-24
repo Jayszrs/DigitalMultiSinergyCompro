@@ -37,6 +37,7 @@ services:
     volumes:
       - wordpress_data:/var/www/html
       - ./wp-content/themes/dms-corporate:/var/www/html/wp-content/themes/dms-corporate
+      - ./docker/wordpress.htaccess:/var/www/html/.htaccess:ro
 
   wpcli:
     image: wordpress:cli

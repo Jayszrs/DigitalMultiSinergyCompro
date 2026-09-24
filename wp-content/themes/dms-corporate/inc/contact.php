@@ -9,6 +9,21 @@ function dms_submit_inquiry(): void {
         wp_die(__('Invalid request.', 'dms'));
     }
 
+    $redirect = home_url('/contact-us/');
+    $honeypot = sanitize_text_field(wp_unslash($_POST['website'] ?? ''));
+    $started = absint($_POST['form_started'] ?? 0);
+    if ($honeypot || !$started || (time() - $started) < 2 || (time() - $started) > DAY_IN_SECONDS) {
+        wp_safe_redirect(add_query_arg('inquiry', 'invalid', $redirect));
+        exit;
+    }
+
+    $ip = sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+    $rate_key = 'dms_inquiry_' . hash('sha256', $ip);
+    if (get_transient($rate_key)) {
+        wp_safe_redirect(add_query_arg('inquiry', 'limited', $redirect));
+        exit;
+    }
+
     $name = sanitize_text_field(wp_unslash($_POST['name'] ?? ''));
     $company = sanitize_text_field(wp_unslash($_POST['company'] ?? ''));
     $email = sanitize_email(wp_unslash($_POST['email'] ?? ''));
@@ -17,7 +32,7 @@ function dms_submit_inquiry(): void {
     $message = sanitize_textarea_field(wp_unslash($_POST['message'] ?? ''));
 
     if (!$name || !$email || !$message || !is_email($email)) {
-        wp_safe_redirect(add_query_arg('inquiry', 'invalid', wp_get_referer() ?: home_url('/contact-us/')));
+        wp_safe_redirect(add_query_arg('inquiry', 'invalid', $redirect));
         exit;
     }
 
@@ -29,6 +44,7 @@ function dms_submit_inquiry(): void {
     ]);
 
     if (!is_wp_error($post_id)) {
+        set_transient($rate_key, 1, 2 * MINUTE_IN_SECONDS);
         foreach (compact('name', 'company', 'email', 'phone', 'type') as $key => $value) {
             update_post_meta($post_id, '_dms_' . $key, $value);
         }
@@ -38,6 +54,6 @@ function dms_submit_inquiry(): void {
         wp_mail($to, $subject, $body, ['Reply-To: ' . $name . ' <' . $email . '>']);
     }
 
-    wp_safe_redirect(add_query_arg('inquiry', 'success', wp_get_referer() ?: home_url('/contact-us/')));
+    wp_safe_redirect(add_query_arg('inquiry', is_wp_error($post_id) ? 'error' : 'success', $redirect));
     exit;
 }

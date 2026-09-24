@@ -12,6 +12,7 @@ add_action('customize_register', function ($wp_customize) {
         'dms_email' => ['Email', 'info@digitalmultisinergy.co.id'],
         'dms_address' => ['Address', 'Company office address'],
         'dms_business_hours' => ['Business Hours', 'Monday - Friday, 08:00 - 17:00'],
+        'dms_whatsapp' => ['WhatsApp (international number)', '6280000000000'],
     ];
     foreach ($fields as $id => [$label, $default]) {
         $wp_customize->add_setting($id, ['default' => $default, 'sanitize_callback' => 'sanitize_text_field']);

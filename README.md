@@ -1,112 +1,124 @@
-# Digital Multi Sinergy — Docker WordPress Starter
+# Digital Multi Sinergy — WordPress Company Profile
 
-Custom WordPress theme implementation for the DMS company profile prototype.
+Implementasi WordPress custom theme untuk company profile Digital Multi Sinergy. UI mengikuti prototype Figma yang diberikan, dengan penyempurnaan responsive layout, aksesibilitas, form, CMS, dan optimasi aset.
 
-## Stack
-- Docker Compose
-- WordPress + PHP 8.3 / Apache
+## Tech stack
+
+- WordPress + PHP 8.3
 - MySQL 8
-- Custom WordPress theme (no page builder)
-- HTML5 / custom CSS / JavaScript
-- GSAP + ScrollTrigger for motion/parallax
-- Native WordPress CMS for Products, News, Careers and Inquiries
-- Polylang-ready language switcher
+- HTML5, custom CSS, vanilla JavaScript
+- GSAP + ScrollTrigger
+- Docker Compose untuk development lokal
+- Polylang-ready untuk Bahasa Indonesia / English
+- Kompatibel dengan shared hosting cPanel + LiteSpeed
 
-## Included
-- Home
-- About Us
-- Product catalogue + category filters + search
-- Product detail + technical specifications
-- News / Articles
-- Career archive + vacancy detail
-- Contact form that stores inquiries in WordPress Admin and attempts `wp_mail()`
-- Responsive desktop/tablet/mobile
-- DMS brand palette and uploaded logo
-- Subtle parallax / reveal animations
-- Sample content seeder
-- phpMyAdmin for local development
+Tidak ada React, Next.js, Vite, atau proses build Node. Source of truth frontend adalah custom WordPress theme.
 
-## Quick start on Windows (PowerShell)
-1. Install Docker Desktop and make sure it is running.
-2. Open PowerShell in this project folder.
-3. Copy `.env.example` to `.env` and change the admin/database passwords.
-4. Run:
+## Struktur
+
+```text
+.
+├── docker-compose.yml                 # local infrastructure
+├── scripts/                           # bootstrap dan sample CMS content
+└── wp-content/themes/dms-corporate/
+    ├── assets/                        # frontend: CSS, JS, WebP, logo
+    ├── inc/                           # backend: CMS, form, meta fields, security
+    ├── front-page.php                 # homepage
+    ├── page-*.php                     # static page templates
+    ├── archive-*.php                  # product/career listings
+    └── single-*.php                   # detail templates
+```
+
+Penjelasan lengkap ada di [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Menjalankan dengan Docker
+
+Persyaratan: Docker Desktop aktif.
+
+### Windows PowerShell
 
 ```powershell
+Copy-Item .env.example .env
+# Ganti password di .env
 Set-ExecutionPolicy -Scope Process Bypass
 .\scripts\bootstrap.ps1
 ```
 
-If PowerShell script policy is not an issue, only the second command is needed.
+### macOS / Linux / Git Bash
 
-## Quick start with Git Bash / macOS / Linux
 ```bash
 cp .env.example .env
-# edit .env
+# Ganti password di .env
+chmod +x scripts/bootstrap.sh
 ./scripts/bootstrap.sh
 ```
 
-## Manual Docker commands
-```bash
-docker compose up -d
-```
-Then open http://localhost:8080 and complete WordPress install manually if you do not use the bootstrap script.
+URL default:
 
-## Local URLs
 - Website: http://localhost:8080
 - WordPress Admin: http://localhost:8080/wp-admin
 - phpMyAdmin: http://localhost:8081
 
-## Recommended plugins
-Install only what is needed:
-- Polylang — bilingual ID/EN
-- FluentSMTP — reliable production email delivery
-- Wordfence — basic WordPress hardening
-- LiteSpeed Cache — production only when the host uses LiteSpeed
+Stop tanpa menghapus database:
 
-Example:
+```bash
+docker compose stop
+```
+
+## CMS
+
+WordPress Admin menyediakan:
+
+- Products + Product Categories
+- Posts untuk News / Articles
+- Careers
+- Inquiries dari contact form
+- Appearance → Customize untuk alamat, email, telepon, WhatsApp, jam kerja, dan hero
+
+Form memakai nonce, sanitasi field, honeypot, dan rate limit dasar. Email produksi tetap perlu SMTP.
+
+## Bilingual
+
+Tanpa plugin, toggle ID / EN bawaan theme dapat dipakai untuk preview copy UI. Untuk production, gunakan Polylang agar setiap halaman, post, taxonomy, dan menu memiliki versi terjemahan sendiri.
+
+```bash
+docker compose run --rm wpcli plugin install polylang --activate
+```
+
+Setelah aktif, buat language `id` dan `en`, lalu hubungkan terjemahan konten serta menu di WordPress Admin.
+
+## Plugin production yang disarankan
+
+Install hanya di environment yang sesuai:
+
 ```bash
 docker compose run --rm wpcli plugin install polylang wordfence fluent-smtp
-```
-Activate after configuration:
-```bash
 docker compose run --rm wpcli plugin activate polylang wordfence fluent-smtp
 ```
 
-## CMS structure
-WordPress Admin will contain:
-- Products
-- Product Categories
-- Posts (News)
-- Careers
-- Inquiries
+- Polylang: bilingual content
+- Wordfence: hardening, firewall, login protection
+- FluentSMTP: reliable email delivery
+- LiteSpeed Cache: pasang dan aktifkan hanya pada hosting yang benar-benar memakai LiteSpeed
 
-Product technical fields are available directly in the Product editor.
-Career location, type and department fields are available in the Career editor.
+WebP bawaan theme sudah tersimpan lokal. Upload WordPress berikutnya sebaiknya dikonversi ke WebP melalui LiteSpeed Cache atau image optimization hosting.
 
-## Editing company information
-Go to **Appearance → Customize → DMS Company Information** for contact details and **DMS Home Hero** for the primary hero copy.
+## Deploy ke shared hosting cPanel
 
-## Important before production
-- Replace all demo/sample copy with approved client content.
-- Upload real project / implementation photos.
-- Configure SMTP; Docker local `wp_mail()` may not deliver email.
-- Configure Polylang and translate content.
-- Create a strong admin password and disable debug mode.
-- Use HTTPS.
-- Configure backups.
-- If production hosting is LiteSpeed-based, enable LiteSpeed Cache.
-- Put Cloudflare in front of the domain if appropriate.
+1. Buat WordPress baru dari cPanel.
+2. Upload folder `wp-content/themes/dms-corporate` ke instalasi WordPress.
+3. Aktifkan theme **DMS Corporate**.
+4. Buat halaman Home, About Us, News, dan Contact Us; atur Home sebagai static front page.
+5. Buka Settings → Permalinks lalu klik Save.
+6. Install/configure Polylang, SMTP, Wordfence, dan LiteSpeed Cache sesuai kebutuhan.
+7. Import atau input ulang konten CMS. Database Docker development tidak perlu di-upload jika konten dibuat langsung di production.
+8. Aktifkan HTTPS, backup terjadwal, dan nonaktifkan debug.
 
-## Production hosting recommendation
-For this scope, begin with a reputable business shared hosting plan that supports:
-- PHP 8.2/8.3+
-- MySQL/MariaDB
-- 2 GB+ practical PHP memory/resources where possible
-- NVMe storage
-- SSL
-- scheduled backups
-- SMTP/email or external SMTP support
-- LiteSpeed preferred
+## Checklist sebelum go-live
 
-A VPS is not necessary at the beginning unless traffic, custom server requirements, or integrations later justify it.
+- Ganti seluruh sample copy, nomor WhatsApp, email, alamat, dan statistik `XX+`.
+- Upload foto proyek dan produk yang telah disetujui.
+- Lengkapi partner logo, sertifikasi, spesifikasi produk, dan lowongan.
+- Uji delivery email dari form.
+- Konfigurasi Polylang dan kedua menu bahasa.
+- Jalankan backup, Wordfence scan, serta pengecekan Lighthouse.
