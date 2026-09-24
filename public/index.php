@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 require dirname(__DIR__) . '/app/bootstrap.php';
 
+$currentLanguage = current_language();
+
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
@@ -146,7 +148,7 @@ if (str_starts_with($path, '/admin')) {
 }
 
 if ($path === '/') {
-    render('site/home', ['pageTitle' => '', 'settings' => $settings, 'products' => array_slice($cms->all('products', true), 0, 5), 'articles' => array_slice($cms->all('articles', true), 0, 3)]);
+    render('site/home', ['pageTitle' => '', 'settings' => $settings, 'products' => array_slice($cms->all('products', true), 0, 6), 'articles' => array_slice($cms->all('articles', true), 0, 3)]);
 } elseif ($path === '/about') {
     render('site/about', ['pageTitle' => tr('Tentang Kami', 'About Us'), 'settings' => $settings]);
 } elseif ($path === '/products') {
@@ -159,13 +161,22 @@ if ($path === '/') {
 } elseif (preg_match('#^/products/([a-z0-9-]+)$#', $path, $matches)) {
     $product = $cms->findBySlug('products', $matches[1]);
     if (!$product) { http_response_code(404); render('site/404', ['pageTitle' => '404', 'settings' => $settings]); }
-    else render('site/product', ['pageTitle' => localized($product, 'title'), 'settings' => $settings, 'product' => $product]);
+    else {
+        $details = json_decode((string) ($product['details_json'] ?? ''), true) ?: [];
+        $relatedProducts = [];
+        foreach (($details['related'] ?? []) as $slug) if ($related = $cms->findBySlug('products', (string) $slug)) $relatedProducts[] = $related;
+        render('site/product', ['pageTitle' => localized($product, 'title'), 'settings' => $settings, 'product' => $product, 'details' => $details, 'relatedProducts' => $relatedProducts]);
+    }
 } elseif ($path === '/news') {
     render('site/news', ['pageTitle' => tr('Berita', 'News'), 'settings' => $settings, 'articles' => $cms->all('articles', true)]);
 } elseif (preg_match('#^/news/([a-z0-9-]+)$#', $path, $matches)) {
     $article = $cms->findBySlug('articles', $matches[1]);
     if (!$article) { http_response_code(404); render('site/404', ['pageTitle' => '404', 'settings' => $settings]); }
-    else render('site/article', ['pageTitle' => localized($article, 'title'), 'settings' => $settings, 'article' => $article]);
+    else {
+        $relatedArticles = [];
+        foreach ((json_decode((string) ($article['related_json'] ?? '[]'), true) ?: []) as $slug) if ($related = $cms->findBySlug('articles', (string) $slug)) $relatedArticles[] = $related;
+        render('site/article', ['pageTitle' => localized($article, 'title'), 'settings' => $settings, 'article' => $article, 'relatedArticles' => $relatedArticles]);
+    }
 } elseif ($path === '/career') {
     render('site/career', ['pageTitle' => tr('Karir', 'Career'), 'settings' => $settings, 'jobs' => $cms->all('jobs', true)]);
 } elseif ($path === '/contact') {

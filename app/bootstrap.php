@@ -21,6 +21,6 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 
 $db = Database::connect($config['db']);
-Schema::migrate($db, $config['seed_admin']);
+Schema::migrate($db, $config['seed_admin'], $config['company']);
 $cms = new Cms($db);
 $auth = new Auth($db);

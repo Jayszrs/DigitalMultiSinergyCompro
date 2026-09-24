@@ -89,7 +89,8 @@ final class Cms
             'slug' => slugify((string) ($data['slug'] ?: $data['title'])), 'title' => trim((string) $data['title']), 'title_en' => trim((string) $data['title_en']),
             'category' => trim((string) $data['category']), 'summary' => trim((string) $data['summary']), 'summary_en' => trim((string) $data['summary_en']),
             'content' => trim((string) $data['content']), 'content_en' => trim((string) $data['content_en']), 'image' => trim((string) $data['image']),
-            'specs_json' => trim((string) $data['specs_json']), 'status' => $data['status'] === 'draft' ? 'draft' : 'published', 'sort_order' => (int) ($data['sort_order'] ?? 0),
+            'specs_json' => trim((string) $data['specs_json']), 'details_json' => trim((string) ($data['details_json'] ?? '')),
+            'status' => $data['status'] === 'draft' ? 'draft' : 'published', 'sort_order' => (int) ($data['sort_order'] ?? 0),
         ];
         return $this->persist('cms_products', $fields, $id);
     }
@@ -98,9 +99,11 @@ final class Cms
     {
         $fields = [
             'slug' => slugify((string) ($data['slug'] ?: $data['title'])), 'title' => trim((string) $data['title']), 'title_en' => trim((string) $data['title_en']),
-            'category' => trim((string) $data['category']), 'excerpt' => trim((string) $data['excerpt']), 'excerpt_en' => trim((string) $data['excerpt_en']),
+            'category' => trim((string) $data['category']), 'category_en' => trim((string) ($data['category_en'] ?? $data['category'])),
+            'excerpt' => trim((string) $data['excerpt']), 'excerpt_en' => trim((string) $data['excerpt_en']),
             'content' => trim((string) $data['content']), 'content_en' => trim((string) $data['content_en']), 'image' => trim((string) $data['image']),
-            'status' => $data['status'] === 'draft' ? 'draft' : 'published', 'published_at' => $this->normalizeDateTime((string) ($data['published_at'] ?: date('Y-m-d H:i:s'))),
+            'related_json' => trim((string) ($data['related_json'] ?? '[]')), 'status' => $data['status'] === 'draft' ? 'draft' : 'published',
+            'published_at' => $this->normalizeDateTime((string) ($data['published_at'] ?: date('Y-m-d H:i:s'))),
         ];
         return $this->persist('cms_articles', $fields, $id);
     }
@@ -109,7 +112,9 @@ final class Cms
     {
         $fields = [
             'slug' => slugify((string) ($data['slug'] ?: $data['title'])), 'title' => trim((string) $data['title']), 'title_en' => trim((string) $data['title_en']),
-            'department' => trim((string) $data['department']), 'location' => trim((string) $data['location']), 'employment_type' => trim((string) $data['employment_type']),
+            'department' => trim((string) $data['department']), 'department_en' => trim((string) ($data['department_en'] ?? $data['department'])),
+            'location' => trim((string) $data['location']), 'employment_type' => trim((string) $data['employment_type']),
+            'employment_type_en' => trim((string) ($data['employment_type_en'] ?? $data['employment_type'])),
             'description' => trim((string) $data['description']), 'description_en' => trim((string) $data['description_en']), 'status' => $data['status'] === 'draft' ? 'draft' : 'published',
         ];
         return $this->persist('cms_jobs', $fields, $id);

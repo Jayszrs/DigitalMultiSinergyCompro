@@ -18,6 +18,7 @@ Template hanya merender data. Produk, artikel, lowongan, inquiry, dan pengaturan
 - `app/bootstrap.php`: session, koneksi database, migration, dan dependency wiring.
 - `app/Database.php`: koneksi PDO dengan prepared statement native.
 - `app/Schema.php`: schema idempotent dan dummy data development.
+- `app/data/catalog.json`: katalog lengkap hasil migrasi prototype lama tanpa membawa kembali runtime React.
 - `app/Cms.php`: query dan operasi CRUD yang diizinkan.
 - `app/Auth.php`: autentikasi admin dan session regeneration.
 - `app/views/admin/`: dashboard serta form pengelolaan konten.
@@ -54,6 +55,7 @@ Semua tabel memakai prefix `cms_`, sehingga aman berdampingan dengan tabel lama 
 - Upload dibatasi 5 MB dan hanya menerima MIME JPEG, PNG, atau WebP.
 - Output user/CMS di-escape sebelum masuk HTML.
 - Security headers dan directory listing protection dipasang dari aplikasi/`.htaccess`.
+- Secret dan konfigurasi runtime berada di `.env` di luar `public/`; akses web ke dotfile ditolak.
 
 Rate limit berbasis session cukup untuk baseline, tetapi production bertrafik tinggi sebaiknya menambah WAF, rate limiter berbasis IP/server, audit log, SMTP notification, dan reset password admin.
 

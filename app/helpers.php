@@ -17,21 +17,48 @@ function asset(string $path): string
     return url('assets/' . ltrim($path, '/'));
 }
 
+function versioned_asset(string $path): string
+{
+    $path = ltrim($path, '/');
+    $file = rtrim((string) ($_SERVER['DOCUMENT_ROOT'] ?? ''), '/\\') . '/assets/' . $path;
+    return asset($path) . '?v=' . (is_file($file) ? (string) filemtime($file) : '1');
+}
+
 function current_language(): string
 {
-    $requested = strtolower((string) ($_GET['lang'] ?? ''));
+    static $resolvedLanguage = null;
+
+    if ($resolvedLanguage !== null) return $resolvedLanguage;
+
+    $requested = strtolower(trim((string) ($_GET['lang'] ?? '')));
+    $resolvedLanguage = in_array($requested, ['id', 'en'], true)
+        ? $requested
+        : (($_COOKIE['dms_lang'] ?? 'id') === 'en' ? 'en' : 'id');
+
     if (in_array($requested, ['id', 'en'], true)) {
-        setcookie('dms_lang', $requested, [
-            'expires' => time() + 2592000,
-            'path' => '/',
-            'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ]);
-        $_COOKIE['dms_lang'] = $requested;
-        return $requested;
+        if (!headers_sent()) {
+            setcookie('dms_lang', $resolvedLanguage, [
+                'expires' => time() + 2592000,
+                'path' => '/',
+                'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
+        }
+        $_COOKIE['dms_lang'] = $resolvedLanguage;
     }
-    return ($_COOKIE['dms_lang'] ?? 'id') === 'en' ? 'en' : 'id';
+
+    return $resolvedLanguage;
+}
+
+function language_url(string $language): string
+{
+    $language = $language === 'en' ? 'en' : 'id';
+    $path = (string) (parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/');
+    $query = $_GET;
+    $query['lang'] = $language;
+
+    return url(ltrim($path, '/')) . '?' . http_build_query($query);
 }
 
 function tr(string $indonesian, string $english): string

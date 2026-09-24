@@ -38,6 +38,19 @@ services:
       CMS_ADMIN_NAME: ${CMS_ADMIN_NAME:-DMS Administrator}
       CMS_ADMIN_EMAIL: ${CMS_ADMIN_EMAIL:-admin@dms.local}
       CMS_ADMIN_PASSWORD: ${CMS_ADMIN_PASSWORD:-AdminDMS!2026}
+      COMPANY_NAME: ${COMPANY_NAME:-Digital Multi Sinergy}
+      COMPANY_TAGLINE: ${COMPANY_TAGLINE:-Technology & Connectivity}
+      COMPANY_EMAIL: ${COMPANY_EMAIL:-info@digitalmultisinergy.co.id}
+      COMPANY_PHONE: ${COMPANY_PHONE:-+62 878-9111-8166}
+      COMPANY_WHATSAPP: ${COMPANY_WHATSAPP:-6287891118166}
+      COMPANY_ADDRESS: ${COMPANY_ADDRESS:-Cervino Apartment, Office Floor L1, M, N, Jl. KH Abdullah Syafei No.27, RT.3/RW.1, Tebet Barat, Kec. Tebet, Daerah Khusus Ibukota Jakarta 12810}
+      COMPANY_HOURS: ${COMPANY_HOURS:-Senin-Jumat, 09.00-17.00 WIB}
+      INSTAGRAM_URL: ${INSTAGRAM_URL:-https://www.instagram.com/digitalmultisinergy.official}
+      LINKEDIN_URL: ${LINKEDIN_URL:-https://www.linkedin.com/company/digitalmultisinergy}
+      MAP_QUERY: ${MAP_QUERY:-Cervino Apartment Office Floor L1 M N Jl KH Abdullah Syafei No 27 Tebet Jakarta 12810}
+      PROJECT_COUNT: ${PROJECT_COUNT:-50+}
+      PARTNER_COUNT: ${PARTNER_COUNT:-20+}
+      EXPERIENCE_YEARS: ${EXPERIENCE_YEARS:-4+}
     volumes:
       - ./public:/var/www/html:ro
       - ./app:/var/www/app:ro

@@ -86,6 +86,21 @@ docker compose down -v
 
 Database dan dummy content dibuat otomatis saat aplikasi pertama kali dibuka. Form kontak memakai CSRF token, honeypot, validasi server, prepared statements, dan rate limit dasar berbasis session.
 
+Seed katalog memulihkan seluruh data prototype: 12 produk dengan spesifikasi, gallery, fitur, aplikasi dan related product; 6 artikel bilingual lengkap; serta 6 posisi karir. Seed memakai version marker sehingga perubahan editor di CMS tidak ditimpa pada request berikutnya.
+
+## Environment dan secret
+
+File `.env` berada di root project, di luar `public/`, dan di-ignore Git. Apache juga menolak akses langsung ke file tersembunyi. Jangan pernah memindahkan `.env` ke document root.
+
+Kelompok variabel yang tersedia:
+
+- Database: `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`
+- Runtime: `APP_URL`, `APP_ENV`, `APP_NAME`, `APP_PORT`, `PMA_PORT`
+- Admin: `CMS_ADMIN_NAME`, `CMS_ADMIN_EMAIL`, `CMS_ADMIN_PASSWORD`
+- Company profile: seluruh `COMPANY_*`, social URL, Maps query, dan statistik
+
+Nilai company profile dari environment hanya menjadi default saat database baru dibuat. Setelah itu editor dapat memperbaruinya melalui CMS Settings.
+
 ## Deploy ke cPanel / LiteSpeed
 
 1. Buat database MySQL/MariaDB dan user database dari cPanel.
