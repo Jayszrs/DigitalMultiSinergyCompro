@@ -1,0 +1,10 @@
+<?php get_header(); $state = sanitize_text_field(wp_unslash($_GET['inquiry'] ?? '')); ?>
+<section class="page-hero compact-hero"><div class="container"><span class="eyebrow eyebrow--dark">Contact Us</span><h1>Let’s Discuss Your Project.</h1><p>Tell us what you are building and our team will help identify the right solution.</p></div></section>
+<section class="section section--flush-top"><div class="container contact-grid">
+<div class="contact-form-wrap" data-reveal>
+<?php if ($state === 'success') echo '<div class="form-notice form-notice--success">Thank you. Your inquiry has been received.</div>'; elseif ($state === 'invalid') echo '<div class="form-notice form-notice--error">Please complete the required fields correctly.</div>'; ?>
+<form class="contact-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>"><input type="hidden" name="action" value="dms_submit_inquiry"><?php wp_nonce_field('dms_contact','dms_contact_nonce'); ?><div class="form-grid"><label>Name *<input name="name" required></label><label>Company<input name="company"></label><label>Email *<input type="email" name="email" required></label><label>Phone<input name="phone"></label></div><label>Inquiry Type<select name="inquiry_type"><option>Product Inquiry</option><option>Connectivity Solution</option><option>IT / Software</option><option>Partnership</option><option>Other</option></select></label><label>Message *<textarea name="message" rows="7" required></textarea></label><button class="button" type="submit">Send Inquiry <span>↗</span></button></form>
+</div>
+<aside class="contact-card" data-reveal><span class="eyebrow eyebrow--dark">Contact Info</span><h2>Get in touch.</h2><dl><dt>Address</dt><dd><?php echo esc_html(get_theme_mod('dms_address','Company office address')); ?></dd><dt>Email</dt><dd><?php echo esc_html(get_theme_mod('dms_email', get_option('admin_email'))); ?></dd><dt>Phone</dt><dd><?php echo esc_html(get_theme_mod('dms_phone','+62 ...')); ?></dd><dt>Business Hours</dt><dd><?php echo esc_html(get_theme_mod('dms_business_hours','Monday - Friday, 08:00 - 17:00')); ?></dd></dl></aside>
+</div></section>
+<?php get_footer(); ?>

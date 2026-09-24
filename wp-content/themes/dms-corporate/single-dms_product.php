@@ -1,0 +1,13 @@
+<?php get_header(); while (have_posts()) : the_post();
+$specs = ['fiber_type' => 'Fiber Type','connector' => 'Connector','return_loss' => 'Return Loss','insertion_loss' => 'Insertion Loss','sku' => 'SKU / Model'];
+$terms = get_the_terms(get_the_ID(), 'dms_product_category');
+?>
+<section class="section product-detail">
+<div class="container"><div class="breadcrumb"><a href="<?php echo esc_url(get_post_type_archive_link('dms_product')); ?>">Products</a><span>/</span><?php if ($terms && !is_wp_error($terms)) echo '<span>'.esc_html($terms[0]->name).'</span><span>/</span>'; ?><span><?php the_title(); ?></span></div>
+<div class="product-detail__grid">
+<div class="product-detail__media" data-reveal><?php dms_image_or_placeholder(get_the_ID(), 'large'); ?></div>
+<div class="product-detail__content" data-reveal><span class="eyebrow eyebrow--dark"><?php echo esc_html($terms && !is_wp_error($terms) ? $terms[0]->name : 'Product'); ?></span><h1><?php the_title(); ?></h1><p class="product-lead"><?php echo esc_html(get_the_excerpt() ?: 'Technical product information and configuration options.'); ?></p><a class="button" href="<?php echo esc_url(home_url('/contact-us/?product=' . rawurlencode(get_the_title()))); ?>">Request Inquiry <span>↗</span></a>
+<div class="spec-table"><h2>Key Specifications</h2><?php foreach ($specs as $key => $label) { $value = get_post_meta(get_the_ID(), '_dms_'.$key, true); if ($value) printf('<div class="spec-row"><span>%s</span><strong>%s</strong></div>', esc_html($label), esc_html($value)); } ?></div></div>
+</div></div></section>
+<section class="section section--soft"><div class="container content-grid"><div><span class="eyebrow eyebrow--dark">Product Overview</span><h2>Designed for dependable implementation.</h2></div><div class="prose"><?php the_content(); ?></div></div></section>
+<?php endwhile; get_footer(); ?>

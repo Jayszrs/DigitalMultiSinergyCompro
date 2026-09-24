@@ -1,0 +1,1 @@
+<?php get_header(); ?><section class="section"><div class="container empty-state"><span class="eyebrow eyebrow--dark">404</span><h1>Page not found.</h1><p>The page you are looking for may have moved.</p><a class="button" href="<?php echo esc_url(home_url('/')); ?>">Back to Home</a></div></section><?php get_footer(); ?>

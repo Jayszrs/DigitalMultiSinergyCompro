@@ -1,0 +1,3 @@
+<?php get_header(); while (have_posts()) : the_post(); ?>
+<section class="section job-detail"><div class="container content-grid"><div><span class="eyebrow eyebrow--dark"><?php echo esc_html(get_post_meta(get_the_ID(),'_dms_department',true)); ?></span><h1><?php the_title(); ?></h1><p><?php echo esc_html(get_post_meta(get_the_ID(),'_dms_location',true)); ?> · <?php echo esc_html(get_post_meta(get_the_ID(),'_dms_type',true)); ?></p><a class="button" href="<?php echo esc_url(home_url('/contact-us/?inquiry=career')); ?>">Apply / Contact Us <span>↗</span></a></div><div class="prose"><?php the_content(); ?></div></div></section>
+<?php endwhile; get_footer(); ?>

@@ -1,0 +1,11 @@
+{
+  "title": "digitalmultisinergy",
+  "description": "This web application streamlines project management by allowing teams to collaborate, track progress, and manage tasks efficiently in one platform.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
