@@ -430,3 +430,282 @@ body {
   .product-gallery a { height: 88px; }
   .benefit-columns article { padding: 27px 22px; }
 }
+
+/* 2026 interaction and responsive refinement */
+.home-hero,
+.page-hero {
+  isolation: isolate;
+}
+
+.home-hero::before {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background:
+    radial-gradient(circle at 14% 22%, rgba(76, 178, 230, .16), transparent 22%),
+    linear-gradient(115deg, transparent 48%, rgba(255, 255, 255, .035) 48.2%, transparent 48.5%);
+  content: "";
+  pointer-events: none;
+}
+
+.hero-wave {
+  position: absolute;
+  z-index: 4;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: clamp(58px, 8vw, 118px);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-wave svg {
+  width: 100%;
+  height: 100%;
+}
+
+.hero-wave .wave-line {
+  fill: none;
+  stroke: rgba(76, 178, 230, .42);
+  stroke-width: 1.25;
+}
+
+.hero-wave .wave-line-back {
+  stroke: rgba(247, 153, 46, .28);
+}
+
+.hero-wave .wave-fill {
+  fill: #f8fafc;
+}
+
+.home-hero .hero-copy {
+  z-index: 5;
+}
+
+.hero-copy > p {
+  text-wrap: balance;
+}
+
+.section {
+  min-height: auto;
+}
+
+.section-flow {
+  position: absolute;
+  z-index: 1;
+  top: 35%;
+  right: -9vw;
+  width: min(42vw, 620px);
+  height: 170px;
+  border-top: 1px solid rgba(76, 178, 230, .14);
+  border-radius: 50%;
+  box-shadow: 0 -24px 0 -23px rgba(40, 76, 152, .12), 0 -48px 0 -47px rgba(247, 153, 46, .1);
+  rotate: -9deg;
+  pointer-events: none;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.solution-card {
+  min-width: 0;
+  height: 100%;
+  border-color: rgba(40, 76, 152, .12);
+  box-shadow: 0 14px 45px rgba(11, 22, 40, .055);
+}
+
+.solution-card .card-body {
+  display: flex;
+  min-height: 245px;
+  flex-direction: column;
+}
+
+.solution-card .card-body b {
+  margin-top: auto;
+}
+
+.project-card,
+.news-card,
+.product-card,
+.stats-grid article,
+.process-grid article {
+  box-shadow: 0 16px 48px rgba(11, 22, 40, .05);
+}
+
+.projects .section-head,
+.news-home .section-head {
+  max-width: none;
+}
+
+.projects .section-head h2 {
+  max-width: 900px;
+}
+
+.why {
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 15% 25%, rgba(76, 178, 230, .16), transparent 28%),
+    radial-gradient(circle at 88% 78%, rgba(40, 76, 152, .32), transparent 30%),
+    #07182d;
+}
+
+.why::after {
+  position: absolute;
+  right: -100px;
+  bottom: -130px;
+  width: 430px;
+  height: 430px;
+  border: 1px solid rgba(76, 178, 230, .14);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 65px rgba(76, 178, 230, .025), inset 0 0 0 130px rgba(255, 255, 255, .018);
+  content: "";
+}
+
+.value-grid article {
+  background: linear-gradient(145deg, rgba(255, 255, 255, .055), rgba(255, 255, 255, .015));
+  backdrop-filter: blur(6px);
+}
+
+.news-home .news-card,
+.catalog-section .product-card {
+  height: 100%;
+}
+
+.news-card > div,
+.product-card > div {
+  display: flex;
+  min-height: 250px;
+  flex-direction: column;
+}
+
+.news-card .text-link,
+.product-card .text-link {
+  margin-top: auto;
+}
+
+.parallax-image img {
+  will-change: auto;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .solution-card:hover,
+  .news-card:hover,
+  .product-card:hover,
+  .project-card:hover {
+    transform: translateY(-7px);
+  }
+}
+
+@media (max-width: 1080px) {
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 780px) {
+  .home-hero {
+    min-height: max(680px, 100svh);
+  }
+
+  .page-hero {
+    min-height: 520px;
+    padding-bottom: 95px;
+    border-radius: 0;
+  }
+
+  .hero-wave {
+    height: 66px;
+  }
+
+  .hero-orbits {
+    right: -410px;
+    opacity: .12;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .solution-card .card-body,
+  .news-card > div,
+  .product-card > div {
+    min-height: 0;
+  }
+
+  .section-flow {
+    right: -120px;
+    width: 300px;
+    opacity: .7;
+  }
+
+  .section:not(.dark)::before {
+    right: -230px;
+    opacity: .75;
+  }
+
+  .section:not(.dark)::after {
+    display: none;
+  }
+
+  .value-grid article,
+  .career-benefits article {
+    backdrop-filter: none;
+  }
+
+  .main-nav.open {
+    animation: mobile-menu-in .24s ease-out both;
+  }
+
+  .main-nav.open::before {
+    position: absolute;
+    right: -95px;
+    bottom: -80px;
+    width: 280px;
+    height: 280px;
+    border: 1px solid rgba(76, 178, 230, .16);
+    border-radius: 50%;
+    content: "";
+  }
+}
+
+@media (max-width: 430px) {
+  .products-home {
+    padding-top: 72px;
+  }
+
+  .page-hero {
+    min-height: 500px;
+  }
+
+  .hero-copy h1 {
+    text-wrap: balance;
+  }
+
+  .card-image,
+  .news-image,
+  .product-image {
+    height: 205px;
+  }
+
+  .section-flow {
+    display: none;
+  }
+}
+
+@keyframes mobile-menu-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-media,
+  .hero-orbits,
+  .section-orbit,
+  .cta-logo-mark,
+  .parallax-image img {
+    transform: none !important;
+  }
+}

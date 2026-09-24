@@ -97,13 +97,33 @@ final class Schema
         self::addColumn($db, 'cms_jobs', 'department_en', "VARCHAR(120) NOT NULL DEFAULT '' AFTER department");
         self::addColumn($db, 'cms_jobs', 'employment_type_en', "VARCHAR(80) NOT NULL DEFAULT '' AFTER employment_type");
 
-        if ((int) $db->query('SELECT COUNT(*) FROM cms_users')->fetchColumn() === 0) {
-            $statement = $db->prepare('INSERT INTO cms_users (name, email, password_hash, role) VALUES (?, ?, ?, ?)');
-            $statement->execute([$admin['name'], strtolower($admin['email']), password_hash($admin['password'], PASSWORD_DEFAULT), 'admin']);
-        }
+        self::syncAdmin($db, $admin);
 
         self::seedSettings($db, $company);
         self::seedCatalog($db);
+    }
+
+    private static function syncAdmin(PDO $db, array $admin): void
+    {
+        $email = strtolower(trim((string) $admin['email']));
+        $fingerprint = hash('sha256', $email . "\0" . (string) $admin['password']);
+        $statement = $db->prepare("SELECT setting_value FROM cms_settings WHERE setting_key = 'admin_credentials_fingerprint' LIMIT 1");
+        $statement->execute();
+        $storedFingerprint = (string) ($statement->fetchColumn() ?: '');
+        $existing = $db->query('SELECT id FROM cms_users ORDER BY id LIMIT 1')->fetch();
+
+        if (!$existing) {
+            $statement = $db->prepare('INSERT INTO cms_users (name, email, password_hash, role) VALUES (?, ?, ?, ?)');
+            $statement->execute([(string) $admin['name'], $email, password_hash((string) $admin['password'], PASSWORD_DEFAULT), 'admin']);
+        } elseif (!hash_equals($storedFingerprint, $fingerprint)) {
+            $statement = $db->prepare('UPDATE cms_users SET name = ?, email = ?, password_hash = ?, role = ? WHERE id = ?');
+            $statement->execute([(string) $admin['name'], $email, password_hash((string) $admin['password'], PASSWORD_DEFAULT), 'admin', (int) $existing['id']]);
+        }
+
+        if (!hash_equals($storedFingerprint, $fingerprint)) {
+            $statement = $db->prepare("INSERT INTO cms_settings (setting_key, setting_value) VALUES ('admin_credentials_fingerprint', ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)");
+            $statement->execute([$fingerprint]);
+        }
     }
 
     private static function addColumn(PDO $db, string $table, string $column, string $definition): void
