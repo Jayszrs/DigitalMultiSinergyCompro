@@ -1,124 +1,110 @@
-# Digital Multi Sinergy — WordPress Company Profile
+# Digital Multi Sinergy — Custom PHP CMS
 
-Implementasi WordPress custom theme untuk company profile Digital Multi Sinergy. UI mengikuti prototype Figma yang diberikan, dengan penyempurnaan responsive layout, aksesibilitas, form, CMS, dan optimasi aset.
+Company profile dan CMS mandiri untuk Digital Multi Sinergy. Implementasi ini memakai PHP dan MySQL tanpa WordPress, React, Next.js, Vite, atau source Figma runtime.
 
 ## Tech stack
 
-- WordPress + PHP 8.3
-- MySQL 8
+- PHP 8.3 + Apache
+- MySQL 8 / kompatibel MariaDB
 - HTML5, custom CSS, vanilla JavaScript
-- GSAP + ScrollTrigger
+- Plus Jakarta Sans + Manrope
+- GSAP + ScrollTrigger sebagai progressive enhancement
 - Docker Compose untuk development lokal
-- Polylang-ready untuk Bahasa Indonesia / English
+- CMS bilingual Indonesia / English
 - Kompatibel dengan shared hosting cPanel + LiteSpeed
 
-Tidak ada React, Next.js, Vite, atau proses build Node. Source of truth frontend adalah custom WordPress theme.
-
-## Struktur
+## Struktur frontend dan backend
 
 ```text
 .
-├── docker-compose.yml                 # local infrastructure
-├── scripts/                           # bootstrap dan sample CMS content
-└── wp-content/themes/dms-corporate/
-    ├── assets/                        # frontend: CSS, JS, WebP, logo
-    ├── inc/                           # backend: CMS, form, meta fields, security
-    ├── front-page.php                 # homepage
-    ├── page-*.php                     # static page templates
-    ├── archive-*.php                  # product/career listings
-    └── single-*.php                   # detail templates
+├── app/                         # backend, database, auth, CMS, dan server-side views
+│   ├── views/admin/             # UI panel admin
+│   ├── views/layouts/           # layout website dan admin
+│   └── views/site/              # halaman frontend publik
+├── public/                      # satu-satunya web root
+│   ├── assets/css/              # styling frontend dan admin
+│   ├── assets/js/               # navigation, GSAP, dan interaksi admin
+│   ├── assets/images/           # logo dan gambar WebP
+│   ├── uploads/                 # upload CMS; persistent volume di Docker
+│   └── index.php                # router HTTP
+├── docker/php/                  # image PHP/Apache lokal
+├── docker-compose.yml           # web, MySQL, dan phpMyAdmin
+└── scripts/                     # bootstrap lintas platform
 ```
 
-Penjelasan lengkap ada di [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Penjelasan alur data dan batas komponennya ada di [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Menjalankan dengan Docker
 
 Persyaratan: Docker Desktop aktif.
 
-### Windows PowerShell
+Windows PowerShell:
 
 ```powershell
 Copy-Item .env.example .env
-# Ganti password di .env
+# Ganti password CMS dan database di .env
 Set-ExecutionPolicy -Scope Process Bypass
 .\scripts\bootstrap.ps1
 ```
 
-### macOS / Linux / Git Bash
+macOS, Linux, atau Git Bash:
 
 ```bash
 cp .env.example .env
-# Ganti password di .env
+# Ganti password CMS dan database di .env
 chmod +x scripts/bootstrap.sh
 ./scripts/bootstrap.sh
 ```
 
-URL default:
+URL lokal:
 
 - Website: http://localhost:8080
-- WordPress Admin: http://localhost:8080/wp-admin
+- CMS Admin: http://localhost:8080/admin
 - phpMyAdmin: http://localhost:8081
 
-Stop tanpa menghapus database:
+Jika `.env` lama sudah ada, Docker akan tetap menggunakannya. Kredensial admin baru hanya dibuat saat tabel user masih kosong. Nilai contoh development adalah `admin@dms.local`; password mengikuti `CMS_ADMIN_PASSWORD` di `.env`.
+
+Stop tanpa menghapus data:
 
 ```bash
 docker compose stop
 ```
 
-## CMS
-
-WordPress Admin menyediakan:
-
-- Products + Product Categories
-- Posts untuk News / Articles
-- Careers
-- Inquiries dari contact form
-- Appearance → Customize untuk alamat, email, telepon, WhatsApp, jam kerja, dan hero
-
-Form memakai nonce, sanitasi field, honeypot, dan rate limit dasar. Email produksi tetap perlu SMTP.
-
-## Bilingual
-
-Tanpa plugin, toggle ID / EN bawaan theme dapat dipakai untuk preview copy UI. Untuk production, gunakan Polylang agar setiap halaman, post, taxonomy, dan menu memiliki versi terjemahan sendiri.
+Reset seluruh database dan upload lokal hanya jika memang ingin menghapus data development:
 
 ```bash
-docker compose run --rm wpcli plugin install polylang --activate
+docker compose down -v
 ```
 
-Setelah aktif, buat language `id` dan `en`, lalu hubungkan terjemahan konten serta menu di WordPress Admin.
+## Yang bisa dikelola dari CMS
 
-## Plugin production yang disarankan
+- Products: ID/EN, kategori, spesifikasi, gambar, urutan, draft/published
+- News: ID/EN, kategori, gambar, tanggal publish, draft/published
+- Careers: ID/EN, departemen, lokasi, tipe kerja, draft/published
+- Inquiries: data form kontak dan workflow status
+- Settings: email, telepon, WhatsApp, alamat, jam kerja, Instagram, LinkedIn, Google Maps, dan statistik
 
-Install hanya di environment yang sesuai:
+Database dan dummy content dibuat otomatis saat aplikasi pertama kali dibuka. Form kontak memakai CSRF token, honeypot, validasi server, prepared statements, dan rate limit dasar berbasis session.
 
-```bash
-docker compose run --rm wpcli plugin install polylang wordfence fluent-smtp
-docker compose run --rm wpcli plugin activate polylang wordfence fluent-smtp
-```
+## Deploy ke cPanel / LiteSpeed
 
-- Polylang: bilingual content
-- Wordfence: hardening, firewall, login protection
-- FluentSMTP: reliable email delivery
-- LiteSpeed Cache: pasang dan aktifkan hanya pada hosting yang benar-benar memakai LiteSpeed
+1. Buat database MySQL/MariaDB dan user database dari cPanel.
+2. Upload isi folder `public/` ke document root domain, misalnya `public_html/`.
+3. Upload folder `app/` satu tingkat di luar `public_html` bila hosting mengizinkan.
+4. Sesuaikan path bootstrap pada `public_html/index.php` jika posisi folder `app` berbeda.
+5. Set environment variable database, `APP_URL`, dan kredensial admin melalui panel hosting. Jika panel tidak mendukung env var, buat file konfigurasi privat di luar document root dan sesuaikan `app/config.php`.
+6. Pastikan PHP extension `pdo_mysql`, `fileinfo`, dan `mbstring` aktif, serta PHP minimal 8.1.
+7. Beri izin tulis hanya pada folder `public_html/uploads`.
+8. Aktifkan HTTPS, backup database, WebP/AVIF optimization, dan LiteSpeed cache untuk aset statis. Jangan cache route `/admin` atau request POST.
+9. Setelah login pertama, gunakan email/password production yang kuat dan jangan memakai kredensial contoh.
 
-WebP bawaan theme sudah tersimpan lokal. Upload WordPress berikutnya sebaiknya dikonversi ke WebP melalui LiteSpeed Cache atau image optimization hosting.
-
-## Deploy ke shared hosting cPanel
-
-1. Buat WordPress baru dari cPanel.
-2. Upload folder `wp-content/themes/dms-corporate` ke instalasi WordPress.
-3. Aktifkan theme **DMS Corporate**.
-4. Buat halaman Home, About Us, News, dan Contact Us; atur Home sebagai static front page.
-5. Buka Settings → Permalinks lalu klik Save.
-6. Install/configure Polylang, SMTP, Wordfence, dan LiteSpeed Cache sesuai kebutuhan.
-7. Import atau input ulang konten CMS. Database Docker development tidak perlu di-upload jika konten dibuat langsung di production.
-8. Aktifkan HTTPS, backup terjadwal, dan nonaktifkan debug.
+Untuk keamanan production, batasi akses phpMyAdmin, aktifkan 2FA dari hosting jika tersedia, jadwalkan backup, dan tambahkan firewall/WAF dari cPanel atau Cloudflare.
 
 ## Checklist sebelum go-live
 
-- Ganti seluruh sample copy, nomor WhatsApp, email, alamat, dan statistik `XX+`.
-- Upload foto proyek dan produk yang telah disetujui.
-- Lengkapi partner logo, sertifikasi, spesifikasi produk, dan lowongan.
-- Uji delivery email dari form.
-- Konfigurasi Polylang dan kedua menu bahasa.
-- Jalankan backup, Wordfence scan, serta pengecekan Lighthouse.
+- Ganti seluruh dummy copy, produk, artikel, lowongan, statistik, email, dan nomor telepon.
+- Verifikasi Instagram, LinkedIn, WhatsApp, serta lokasi Google Maps.
+- Upload gambar yang sudah memiliki izin penggunaan dan versi WebP.
+- Uji form inquiry dan proses follow-up di CMS.
+- Uji kedua bahasa dan semua ukuran mobile utama.
+- Ganti semua password contoh dan aktifkan HTTPS/backup.

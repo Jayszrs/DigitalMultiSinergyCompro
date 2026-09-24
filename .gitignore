@@ -3,18 +3,9 @@
 .env.*
 !.env.example
 
-# WordPress runtime / user-generated files
-wp-content/uploads/
-wp-content/cache/
-wp-content/upgrade/
-wp-content/backups*/
-wp-content/debug.log
-
-# Optional local plugins and WordPress core are managed outside this repository
-wp-admin/
-wp-includes/
-wp-*.php
-xmlrpc.php
+# CMS user-generated files (Docker keeps these in the uploads_data volume)
+public/uploads/*
+!public/uploads/.gitkeep
 
 # Tooling and OS files
 .DS_Store

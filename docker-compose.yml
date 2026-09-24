@@ -4,7 +4,7 @@ services:
     restart: unless-stopped
     command: --default-authentication-plugin=mysql_native_password
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-dms_wordpress}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-dms_cms}
       MYSQL_USER: ${MYSQL_USER:-dms}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-dms_dev_password}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_dev_password}
@@ -14,49 +14,43 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root_dev_password}"]
       interval: 5s
       timeout: 5s
-      retries: 20
+      retries: 25
 
-  wordpress:
-    image: wordpress:php8.3-apache
+  web:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - "${WP_PORT:-8080}:80"
+      - "${APP_PORT:-8080}:80"
     environment:
-      WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_NAME: ${MYSQL_DATABASE:-dms_wordpress}
-      WORDPRESS_DB_USER: ${MYSQL_USER:-dms}
-      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD:-dms_dev_password}
-      WORDPRESS_DEBUG: ${WORDPRESS_DEBUG:-1}
-      WORDPRESS_CONFIG_EXTRA: |
-        define('WP_ENVIRONMENT_TYPE', 'local');
-        define('WP_DEBUG_LOG', true);
-        define('WP_DEBUG_DISPLAY', false);
+      APP_NAME: ${APP_NAME:-Digital Multi Sinergy}
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      APP_ENV: ${APP_ENV:-local}
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${MYSQL_DATABASE:-dms_cms}
+      DB_USER: ${MYSQL_USER:-dms}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-dms_dev_password}
+      CMS_ADMIN_NAME: ${CMS_ADMIN_NAME:-DMS Administrator}
+      CMS_ADMIN_EMAIL: ${CMS_ADMIN_EMAIL:-admin@dms.local}
+      CMS_ADMIN_PASSWORD: ${CMS_ADMIN_PASSWORD:-AdminDMS!2026}
     volumes:
-      - wordpress_data:/var/www/html
-      - ./wp-content/themes/dms-corporate:/var/www/html/wp-content/themes/dms-corporate
-      - ./docker/wordpress.htaccess:/var/www/html/.htaccess:ro
-
-  wpcli:
-    image: wordpress:cli
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_NAME: ${MYSQL_DATABASE:-dms_wordpress}
-      WORDPRESS_DB_USER: ${MYSQL_USER:-dms}
-      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD:-dms_dev_password}
-    volumes:
-      - wordpress_data:/var/www/html
-      - ./wp-content/themes/dms-corporate:/var/www/html/wp-content/themes/dms-corporate
-      - ./scripts:/workspace/scripts:ro
-    working_dir: /var/www/html
+      - ./public:/var/www/html:ro
+      - ./app:/var/www/app:ro
+      - uploads_data:/var/www/html/uploads
+    command: sh -c "chown -R www-data:www-data /var/www/html/uploads && apache2-foreground"
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://localhost/health') === 'OK' ? 0 : 1);"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 
   phpmyadmin:
-    image: phpmyadmin:latest
+    image: phpmyadmin:5.2-apache
     restart: unless-stopped
     depends_on:
       db:
@@ -70,4 +64,4 @@ services:
 
 volumes:
   db_data:
-  wordpress_data:
+  uploads_data:
