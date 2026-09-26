@@ -4,8 +4,8 @@
 !.env.example
 
 # CMS user-generated files (Docker keeps these in the uploads_data volume)
-public/uploads/*
-!public/uploads/.gitkeep
+frontend/uploads/*
+!frontend/uploads/.gitkeep
 
 # Tooling and OS files
 .DS_Store

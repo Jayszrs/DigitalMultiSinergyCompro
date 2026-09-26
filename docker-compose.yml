@@ -52,8 +52,8 @@ services:
       PARTNER_COUNT: ${PARTNER_COUNT:-20+}
       EXPERIENCE_YEARS: ${EXPERIENCE_YEARS:-4+}
     volumes:
-      - ./public:/var/www/html:ro
-      - ./app:/var/www/app:ro
+      - ./frontend:/var/www/html:ro
+      - ./backend:/var/www/backend:ro
       - uploads_data:/var/www/html/uploads
     command: sh -c "chown -R www-data:www-data /var/www/html/uploads && apache2-foreground"
     healthcheck:

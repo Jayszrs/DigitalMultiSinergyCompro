@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 // Shared hosting can keep .env beside the private app directory. Docker injects
-// the same keys as real environment variables, so nothing secret is served from public/.
+// the same keys as real environment variables, so nothing secret is served from frontend/.
 $envFile = dirname(__DIR__) . '/.env';
 if (is_file($envFile)) {
     foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [] as $line) {

@@ -112,8 +112,8 @@ function pull_flash(): ?array
 
 function render(string $view, array $data = [], string $layout = 'site'): void
 {
-    $viewFile = dirname(__DIR__) . '/app/views/' . $view . '.php';
-    $layoutFile = dirname(__DIR__) . '/app/views/layouts/' . $layout . '.php';
+    $viewFile = dirname(__DIR__) . '/backend/views/' . $view . '.php';
+    $layoutFile = dirname(__DIR__) . '/backend/views/layouts/' . $layout . '.php';
     if (!is_file($viewFile) || !is_file($layoutFile)) throw new RuntimeException('View not found.');
     extract($data, EXTR_SKIP);
     ob_start();

@@ -1,11 +1,11 @@
 # Digital Multi Sinergy — Custom PHP CMS
 
-Company profile dan CMS mandiri untuk Digital Multi Sinergy. Implementasi ini memakai PHP dan MySQL tanpa WordPress, React, Next.js, Vite, atau source Figma runtime.
+Company profile dan CMS mandiri berbasis PHP dan MySQL. Project ini tidak memakai WordPress, React, Next.js, Vite, Tailwind, Node.js, atau runtime Figma.
 
 ## Tech stack
 
 - PHP 8.3 + Apache
-- MySQL 8 / kompatibel MariaDB
+- MySQL 8 / MariaDB
 - HTML5, custom CSS, vanilla JavaScript
 - Plus Jakarta Sans + Manrope
 - GSAP + ScrollTrigger sebagai progressive enhancement
@@ -13,37 +13,36 @@ Company profile dan CMS mandiri untuk Digital Multi Sinergy. Implementasi ini me
 - CMS bilingual Indonesia / English
 - Kompatibel dengan shared hosting cPanel + LiteSpeed
 
-## Struktur frontend dan backend
+## Struktur project
 
 ```text
 .
-├── app/                         # backend, database, auth, CMS, dan server-side views
-│   ├── views/admin/             # UI panel admin
-│   ├── views/layouts/           # layout website dan admin
-│   └── views/site/              # halaman frontend publik
-├── public/                      # satu-satunya web root
-│   ├── assets/css/              # styling frontend dan admin
-│   ├── assets/js/               # navigation, GSAP, dan interaksi admin
-│   ├── assets/images/           # logo dan gambar WebP
-│   ├── uploads/                 # upload CMS; persistent volume di Docker
-│   └── index.php                # router HTTP
-├── docker/php/                  # image PHP/Apache lokal
-├── docker-compose.yml           # web, MySQL, dan phpMyAdmin
-└── scripts/                     # bootstrap lintas platform
+├── backend/                    # kode privat PHP
+│   ├── data/                   # seed katalog
+│   ├── views/admin/            # template CMS
+│   ├── views/layouts/          # layout publik dan admin
+│   └── views/site/             # template website publik
+├── frontend/                   # satu-satunya document root
+│   ├── assets/css/             # CSS website dan CMS
+│   ├── assets/js/              # interaksi dan animasi
+│   ├── assets/images/          # logo dan gambar WebP
+│   ├── uploads/                # upload CMS
+│   └── index.php               # front controller/router
+├── docker/php/                 # image PHP/Apache
+├── docs/                       # arsitektur dan dokumen referensi
+├── scripts/                    # bootstrap Windows/Linux
+└── docker-compose.yml
 ```
 
-Penjelasan alur data dan batas komponennya ada di [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Detail alur dan batas komponen tersedia di [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Menjalankan dengan Docker
-
-Persyaratan: Docker Desktop aktif.
 
 Windows PowerShell:
 
 ```powershell
 Copy-Item .env.example .env
-# Ganti password CMS dan database di .env
-Set-ExecutionPolicy -Scope Process Bypass
+# Ganti semua password development.
 .\scripts\bootstrap.ps1
 ```
 
@@ -51,7 +50,7 @@ macOS, Linux, atau Git Bash:
 
 ```bash
 cp .env.example .env
-# Ganti password CMS dan database di .env
+# Ganti semua password development.
 chmod +x scripts/bootstrap.sh
 ./scripts/bootstrap.sh
 ```
@@ -62,64 +61,55 @@ URL lokal:
 - CMS Admin: http://localhost:8080/admin
 - phpMyAdmin: http://localhost:8081
 
-Jika `.env` lama sudah ada, Docker akan tetap menggunakannya. Kredensial admin baru hanya dibuat saat tabel user masih kosong. Nilai contoh development adalah `admin@dms.local`; password mengikuti `CMS_ADMIN_PASSWORD` di `.env`.
-
 Stop tanpa menghapus data:
 
 ```bash
 docker compose stop
 ```
 
-Reset seluruh database dan upload lokal hanya jika memang ingin menghapus data development:
+Jangan memakai `docker compose down -v` kecuali memang ingin menghapus seluruh database dan upload lokal.
 
-```bash
-docker compose down -v
-```
+## CMS
 
-## Yang bisa dikelola dari CMS
+CMS mengelola:
 
-- Products: ID/EN, kategori, spesifikasi, gambar, urutan, draft/published
-- News: ID/EN, kategori, gambar, tanggal publish, draft/published
-- Careers: ID/EN, departemen, lokasi, tipe kerja, draft/published
-- Inquiries: data form kontak dan workflow status
-- Settings: email, telepon, WhatsApp, alamat, jam kerja, Instagram, LinkedIn, Google Maps, dan statistik
+- Produk bilingual, kategori, spesifikasi, gambar, urutan, dan status publish.
+- Berita bilingual, kategori, gambar, tanggal publish, dan status.
+- Lowongan bilingual.
+- Inquiry dari form kontak.
+- Profil perusahaan, social link, Maps, WhatsApp, dan statistik.
 
-Database dan dummy content dibuat otomatis saat aplikasi pertama kali dibuka. Form kontak memakai CSRF token, honeypot, validasi server, prepared statements, dan rate limit dasar berbasis session.
-
-Seed katalog memulihkan seluruh data prototype: 12 produk dengan spesifikasi, gallery, fitur, aplikasi dan related product; 6 artikel bilingual lengkap; serta 6 posisi karir. Seed memakai version marker sehingga perubahan editor di CMS tidak ditimpa pada request berikutnya.
+Seed development berisi 12 produk, 6 artikel, dan 6 posisi karier. Form publik memakai CSRF, honeypot, validasi server, prepared statements, dan rate limit berbasis session.
 
 ## Environment dan secret
 
-File `.env` berada di root project, di luar `public/`, dan di-ignore Git. Apache juga menolak akses langsung ke file tersembunyi. Jangan pernah memindahkan `.env` ke document root.
+`.env` berada di root project, di luar `frontend/`, serta diabaikan Git. Jangan memindahkannya ke document root.
 
-Kelompok variabel yang tersedia:
+Kelompok variabel:
 
 - Database: `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`
 - Runtime: `APP_URL`, `APP_ENV`, `APP_NAME`, `APP_PORT`, `PMA_PORT`
 - Admin: `CMS_ADMIN_NAME`, `CMS_ADMIN_EMAIL`, `CMS_ADMIN_PASSWORD`
-- Company profile: seluruh `COMPANY_*`, social URL, Maps query, dan statistik
+- Company: seluruh `COMPANY_*`, social URL, Maps query, dan statistik
 
-Nilai company profile dari environment hanya menjadi default saat database baru dibuat. Setelah itu editor dapat memperbaruinya melalui CMS Settings.
+Kredensial admin dari environment disinkronkan ke database dalam bentuk password hash. Nilai secret tidak pernah dirender ke halaman publik.
 
-## Deploy ke cPanel / LiteSpeed
+## Deploy cPanel / LiteSpeed
 
-1. Buat database MySQL/MariaDB dan user database dari cPanel.
-2. Upload isi folder `public/` ke document root domain, misalnya `public_html/`.
-3. Upload folder `app/` satu tingkat di luar `public_html` bila hosting mengizinkan.
-4. Sesuaikan path bootstrap pada `public_html/index.php` jika posisi folder `app` berbeda.
-5. Set environment variable database, `APP_URL`, dan kredensial admin melalui panel hosting. Jika panel tidak mendukung env var, buat file konfigurasi privat di luar document root dan sesuaikan `app/config.php`.
-6. Pastikan PHP extension `pdo_mysql`, `fileinfo`, dan `mbstring` aktif, serta PHP minimal 8.1.
-7. Beri izin tulis hanya pada folder `public_html/uploads`.
-8. Aktifkan HTTPS, backup database, WebP/AVIF optimization, dan LiteSpeed cache untuk aset statis. Jangan cache route `/admin` atau request POST.
-9. Setelah login pertama, gunakan email/password production yang kuat dan jangan memakai kredensial contoh.
+1. Buat database MySQL/MariaDB dan user database.
+2. Upload isi `frontend/` ke document root, misalnya `public_html/`.
+3. Upload `backend/` satu tingkat di luar `public_html/`.
+4. Sesuaikan path bootstrap pada `public_html/index.php` bila susunannya berbeda.
+5. Simpan konfigurasi dan secret di luar document root.
+6. Aktifkan extension `pdo_mysql`, `fileinfo`, dan `mbstring`; gunakan PHP minimal 8.1.
+7. Beri izin tulis hanya pada `public_html/uploads/`.
+8. Aktifkan HTTPS, backup, optimasi WebP/AVIF, dan LiteSpeed Cache untuk aset statis.
+9. Jangan cache `/admin` atau request POST.
 
-Untuk keamanan production, batasi akses phpMyAdmin, aktifkan 2FA dari hosting jika tersedia, jadwalkan backup, dan tambahkan firewall/WAF dari cPanel atau Cloudflare.
+## Checklist go-live
 
-## Checklist sebelum go-live
-
-- Ganti seluruh dummy copy, produk, artikel, lowongan, statistik, email, dan nomor telepon.
-- Verifikasi Instagram, LinkedIn, WhatsApp, serta lokasi Google Maps.
-- Upload gambar yang sudah memiliki izin penggunaan dan versi WebP.
-- Uji form inquiry dan proses follow-up di CMS.
-- Uji kedua bahasa dan semua ukuran mobile utama.
-- Ganti semua password contoh dan aktifkan HTTPS/backup.
+- Ganti dummy copy, produk, artikel, lowongan, statistik, dan kontak.
+- Verifikasi Instagram, LinkedIn, WhatsApp, dan Google Maps.
+- Uji form inquiry, kedua bahasa, serta ukuran mobile.
+- Gunakan password production yang kuat.
+- Aktifkan HTTPS, firewall/WAF, dan backup berkala.
